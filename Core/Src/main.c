@@ -95,6 +95,13 @@ bool my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 	data->state = _lcd->touch_pressed; // or LV_INDEV_STATE_REL;
 	return false; /*No buffering now so no more data read*/
 }
+void btn_event_cb(lv_obj_t * btn, lv_event_t event)
+{
+    if(event == LV_EVENT_CLICKED) {
+        printf("Clicked\n");
+    }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == TOUCH_IRQ_Pin) {
 		//HAL_GPIO_DeInit(TOUCH_IRQ_GPIO_Port,TOUCH_IRQ_Pin);
@@ -219,8 +226,10 @@ int main(void) {
 	ili9341_set_touch_pressed_begin(_lcd, screenTouchBegin);
 	ili9341_set_touch_pressed_end(_lcd, screenTouchEnd);
 	lv_init();
+
 	/*Initialize `disp_buf` with the buffer(s) */
 	lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, MY_DISP_HOR_RES * 10);
+	/* INIT DISPLAY */
 	static lv_disp_drv_t disp_drv; /*A variable to hold the drivers. Can be local variable*/
 	lv_disp_drv_init(&disp_drv); /*Basic initialization*/
 	disp_drv.draw_buf = &disp_buf; /*Set an initialized buffer*/
@@ -228,21 +237,26 @@ int main(void) {
 	disp_drv.rounder_cb = 0;
 	lv_disp_t *disp;
 	disp = lv_disp_drv_register(&disp_drv); /*Register the driver and save the created display objects*/
-
+	/*INIT INPUT DEVICE*/
 	static lv_indev_drv_t indev_drv;
+	lv_indev_drv_init(&indev_drv); /*Basic initialization*/
 	indev_drv.type = LV_INDEV_TYPE_POINTER;
 	indev_drv.read_cb = my_input_read;
 
-	lv_indev_drv_init(&indev_drv); /*Basic initialization*/
+
 
 	lv_indev_t *my_indev = lv_indev_drv_register(&indev_drv);
-	//lv_init();
+
+	/* Create Test Object */
 	lv_tick_inc(1);
 	btn = lv_btn_create(lv_scr_act());
+
 	lv_obj_align(btn, LV_ALIGN_CENTER, 0, -40);
+	 lv_obj_add_event_cb(btn, btn_event_cb, NULL);
 	lv_obj_t *label;
 	label = lv_label_create(btn);
 	lv_label_set_text(label, "Button");
+
 	/* USER CODE END 2 */
 
 	/* Init scheduler */
@@ -658,7 +672,7 @@ void StartDefaultTask(void *argument) {
 
 			lv_obj_set_pos(btn, 10 + i, 10); /*Set its position*/
 			/*Set the labels text*/
-			i++;
+			//i++;
 			if (i > 150) {
 				i = 0;
 			}
