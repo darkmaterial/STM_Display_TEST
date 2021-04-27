@@ -210,7 +210,7 @@ ili9341_t *ili9341_new(
 
     ili9341_touch_support_t   touch_support,
     ili9341_touch_normalize_t touch_normalize, SPI_HandleTypeDef *touch_spi_hal);
-
+void ili9341_touch_lvgl_handler(ili9341_t *lcd);
 void ili9341_touch_interrupt(ili9341_t *lcd);
 ili9341_touch_pressed_t ili9341_touch_pressed(ili9341_t *lcd);
 

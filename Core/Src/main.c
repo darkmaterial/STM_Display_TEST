@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "tpcal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -90,8 +91,11 @@ void LVGL_Handler_Function(void *argument);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 bool my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
+	ili9341_touch_lvgl_handler(_lcd);
 	data->point.x = _lcd->touch_coordinate.x;
 	data->point.y = _lcd->touch_coordinate.y;
+	//data->point.x = 15;
+	//data->point.y = 15;
 	data->state = _lcd->touch_pressed; // or LV_INDEV_STATE_REL;
 	return false; /*No buffering now so no more data read*/
 }
@@ -195,6 +199,7 @@ int main(void) {
 	/* MCU Configuration--------------------------------------------------------*/
 
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+
 	HAL_Init();
 
 	/* USER CODE BEGIN Init */
@@ -249,14 +254,16 @@ int main(void) {
 
 	/* Create Test Object */
 	lv_tick_inc(1);
+
 	btn = lv_btn_create(lv_scr_act());
 
-	lv_obj_align(btn, LV_ALIGN_CENTER, 0, -40);
-	 lv_obj_add_event_cb(btn, btn_event_cb, NULL);
+	//lv_obj_align(btn, NULL, 0, -40);
+	lv_obj_add_event_cb(btn, btn_event_cb, NULL);
 	lv_obj_t *label;
 	label = lv_label_create(btn);
 	lv_label_set_text(label, "Button");
-
+	lv_obj_set_size(btn, 5000, 5000);
+	lv_obj_set_pos(btn, 10, 10);
 	/* USER CODE END 2 */
 
 	/* Init scheduler */
@@ -667,10 +674,10 @@ void StartDefaultTask(void *argument) {
 		// char buf[10];
 		//int rc= HAL_SPI_Transmit_DMA(&hspi1, buf, 10);
 		if ( xSemaphoreTake( LVGL_Mutex, ( TickType_t ) 10 ) == pdTRUE) {
-			lv_obj_set_size(btn, 120, 50); /*Set its size*/
+			//lv_obj_set_size(btn, 120, 50); /*Set its size*/
 			/*Add a label to the button*/
 
-			lv_obj_set_pos(btn, 10 + i, 10); /*Set its position*/
+			//lv_obj_set_pos(btn, 10 + i, 10); /*Set its position*/
 			/*Set the labels text*/
 			//i++;
 			if (i > 150) {

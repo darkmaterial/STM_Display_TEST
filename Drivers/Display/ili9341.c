@@ -55,7 +55,7 @@ ili9341_two_dimension_t ili9341_clip_touch_coordinate(ili9341_two_dimension_t co
     ili9341_two_dimension_t min, ili9341_two_dimension_t max);
 ili9341_two_dimension_t ili9341_project_touch_coordinate(ili9341_t *lcd,
     uint16_t x_pos, uint16_t y_pos);
-
+void ili9341_touch_get_raw(ili9341_t *lcd, uint16_t *x_pos, uint16_t *y_pos);
 // ------------------------------------------------------- exported functions --
 
 ili9341_t *ili9341_new(
@@ -148,7 +148,17 @@ ili9341_t *ili9341_new(
 
   return lcd;
 }
-
+void ili9341_touch_lvgl_handler(ili9341_t *lcd){
+	if (ili9341_touch_pressed(lcd)){
+		uint16_t x_pos;
+		uint16_t y_pos;
+		lcd->touch_pressed=1;
+		ili9341_touch_get_raw(lcd, &x_pos, &y_pos);
+		lcd->touch_coordinate.x=x_pos;
+		lcd->touch_coordinate.y=y_pos;
+	}
+	return;
+}
 void ili9341_touch_interrupt(ili9341_t *lcd)
 {
   uint16_t x_pos;
@@ -224,7 +234,26 @@ void ili9341_set_touch_pressed_end(ili9341_t *lcd, ili9341_touch_callback_t call
     lcd->touch_pressed_end = callback;
   }
 }
+void ili9341_touch_get_raw(ili9341_t *lcd, uint16_t *x_pos, uint16_t *y_pos){
 
+	  // XPT2046 8-bit command patterns
+	  static uint8_t x_cmd[]  = { 0xD3 };
+	  static uint8_t y_cmd[]  = { 0x93 };
+
+	 ili9341_spi_touch_select(lcd);
+	    uint8_t x_raw[2];
+	    uint8_t y_raw[2];
+
+	    HAL_SPI_Transmit(lcd->touch_spi_hal, (uint8_t*)x_cmd, sizeof(x_cmd), __SPI_MAX_DELAY__);
+	    HAL_SPI_TransmitReceive(lcd->touch_spi_hal, (uint8_t*)x_cmd, x_raw, sizeof(x_raw), __SPI_MAX_DELAY__);
+
+	    HAL_SPI_Transmit(lcd->touch_spi_hal, (uint8_t*)y_cmd, sizeof(y_cmd), __SPI_MAX_DELAY__);
+	    HAL_SPI_TransmitReceive(lcd->touch_spi_hal, (uint8_t*)y_cmd, y_raw, sizeof(y_raw), __SPI_MAX_DELAY__);
+	    ili9341_spi_touch_release(lcd);
+	    *x_pos=__LEu16(x_raw) >> 3;
+	    *y_pos= __LEu16(y_raw) >> 3;
+	    return;
+}
 ili9341_touch_pressed_t ili9341_touch_coordinate(ili9341_t *lcd,
     uint16_t *x_pos, uint16_t *y_pos)
 {
@@ -242,11 +271,7 @@ ili9341_touch_pressed_t ili9341_touch_coordinate(ili9341_t *lcd,
       break;
   }
 
-  // XPT2046 8-bit command patterns
-  static uint8_t x_cmd[]  = { 0xD3 };
-  static uint8_t y_cmd[]  = { 0x93 };
   static uint8_t sleep[]  = { 0x00 };
-
   uint32_t x_avg = 0U;
   uint32_t y_avg = 0U;
 
@@ -264,21 +289,12 @@ ili9341_touch_pressed_t ili9341_touch_coordinate(ili9341_t *lcd,
 
 
   while ((itpPressed == ili9341_touch_pressed(lcd)) && (sample--)) {
-	  ili9341_spi_touch_select(lcd);
-    uint8_t x_raw[2];
-    uint8_t y_raw[2];
-
-    HAL_SPI_Transmit(lcd->touch_spi_hal, (uint8_t*)x_cmd, sizeof(x_cmd), __SPI_MAX_DELAY__);
-    HAL_SPI_TransmitReceive(lcd->touch_spi_hal, (uint8_t*)x_cmd, x_raw, sizeof(x_raw), __SPI_MAX_DELAY__);
-
-    HAL_SPI_Transmit(lcd->touch_spi_hal, (uint8_t*)y_cmd, sizeof(y_cmd), __SPI_MAX_DELAY__);
-    HAL_SPI_TransmitReceive(lcd->touch_spi_hal, (uint8_t*)y_cmd, y_raw, sizeof(y_raw), __SPI_MAX_DELAY__);
-    ili9341_spi_touch_release(lcd);
-    x_avg += __LEu16(x_raw) >> 3;
-    y_avg += __LEu16(y_raw) >> 3;
-
+	  uint16_t x_raw;
+	  		uint16_t y_raw;
+	ili9341_touch_get_raw(lcd,&x_raw,&y_raw);
+    x_avg += x_raw;
+    y_avg += y_raw;
     ++num_samples;
-
   }
   ili9341_spi_touch_select(lcd);
   HAL_SPI_Transmit(lcd->touch_spi_hal, (uint8_t*)sleep, sizeof(sleep), __SPI_MAX_DELAY__);
@@ -290,14 +306,14 @@ ili9341_touch_pressed_t ili9341_touch_coordinate(ili9341_t *lcd,
   // TODO: based on STM32G4, which is clocked at 170MHz. support other chips.
  // MODIFY_REG(lcd->spi_hal->Instance->CR1, SPI_CR1_BR, SPI_BAUDRATEPRESCALER_8);
 
-  if (num_samples < req_samples)
-    { return itpNotPressed; }
-
   ili9341_two_dimension_t coord =
       ili9341_project_touch_coordinate(lcd, x_avg / req_samples, y_avg / req_samples);
 
   *x_pos = coord.x;
   *y_pos = coord.y;
+  if (num_samples < req_samples)
+    { return itpNotPressed; }
+
 
   return itpPressed;
 }
