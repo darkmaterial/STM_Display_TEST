@@ -99,11 +99,10 @@ bool my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 	data->state = _lcd->touch_pressed; // or LV_INDEV_STATE_REL;
 	return false; /*No buffering now so no more data read*/
 }
-void btn_event_cb(lv_obj_t * btn, lv_event_t event)
-{
-    if(event == LV_EVENT_CLICKED) {
-        printf("Clicked\n");
-    }
+void btn_event_cb(lv_obj_t *btn, lv_event_t event) {
+	if (event == LV_EVENT_CLICKED) {
+		printf("Clicked\n");
+	}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -248,8 +247,6 @@ int main(void) {
 	indev_drv.type = LV_INDEV_TYPE_POINTER;
 	indev_drv.read_cb = my_input_read;
 
-
-
 	lv_indev_t *my_indev = lv_indev_drv_register(&indev_drv);
 
 	/* Create Test Object */
@@ -261,9 +258,40 @@ int main(void) {
 	lv_obj_add_event_cb(btn, btn_event_cb, NULL);
 	lv_obj_t *label;
 	label = lv_label_create(btn);
-	lv_label_set_text(label, "Button");
-	lv_obj_set_size(btn, 5000, 5000);
+	lv_label_set_text(label, "+");
+	lv_obj_set_size(btn, 10, 10);
 	lv_obj_set_pos(btn, 10, 10);
+
+	/*Create an array for the points of the line*/
+	static lv_point_t line_points[] = { { 5, 5 }, { 70, 70 }, { 120, 10 }, {
+			180, 60 }, { 240, 10 } };
+
+	/*Create style*/
+	static lv_style_t style_line;
+	lv_style_init(&style_line);
+	lv_style_set_bg_color(&style_line, lv_color_red());
+	lv_style_set_line_width(&style_line, 2);
+	lv_style_set_line_rounded(&style_line, true);
+	lv_style_set_bg_opa(&style_line, LV_OPA_10);
+	lv_style_set_border_opa(&style_line, LV_OPA_10);
+	/*Create a line and apply the new style*/
+	lv_obj_t *line1;
+	line1 = lv_line_create(lv_scr_act());
+	lv_line_set_points(line1, line_points, 5); /*Set the points*/
+	lv_obj_add_style(line1, &style_line, 0);
+	lv_obj_center(line1);
+
+	lv_obj_t *label1 = lv_label_create(lv_scr_act());
+	lv_label_set_long_mode(label1, LV_LABEL_LONG_WRAP); /*Break the long lines*/
+	lv_label_set_recolor(label1, true); /*Enable re-coloring by commands in the text*/
+	//lv_label_set_align(label1, LV_TEXT_ALIGN_CENTER);       /*Center aligned lines*/
+	lv_label_set_text(label1,
+			"#0000ff Re-color# #ff00ff words# #ff0000 of a# label "
+					"and  wrap long text automatically.");
+	lv_obj_set_width(label1, 150);
+
+	ili9341_touch_lvgl_calibration();
+
 	/* USER CODE END 2 */
 
 	/* Init scheduler */

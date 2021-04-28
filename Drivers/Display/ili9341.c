@@ -15,6 +15,10 @@
 #include "ili9341_gfx.h"
 #include "ili9341_font.h"
 
+#define LVGL
+#ifdef LVGL
+#include "lvgl.h"
+#endif
 // ---------------------------------------------------------- private defines --
 
 #define __ILI9341_TOUCH_NORM_SAMPLES__ 8U
@@ -147,6 +151,106 @@ ili9341_t *ili9341_new(
   }
 
   return lcd;
+}
+void ili9341_touch_gauss(float A[3][4], float x[3]){
+		int i, j, k, n;
+		float c;
+		n = 3;
+		/*A[0][0] = 10;
+		A[0][1] = -7;
+		A[0][2] = 5;
+		A[0][3] = 9;
+		A[1][0] = 3;
+		A[1][1] = 6;
+		A[1][2] = 0;
+		A[1][3] = -9;
+		A[2][0] = 9;
+		A[2][1] = 3;
+		A[2][2] = -2;
+		A[2][3] = -1;*/
+		/* Now finding the elements of diagonal matrix */
+		for (j = 0; j < n; j++) {
+			for (i = 0; i < n; i++) {
+				if (i != j) {
+					c = A[i][j] / A[j][j];
+					for (k = 0; k <= n; k++) {
+						A[i][k] = A[i][k] - c * A[j][k];
+					}
+				}
+			}
+		}
+
+		for (i = 0; i < n; i++) {
+			x[i] = A[i][n] / A[i][i];
+		}
+return;
+}
+void ili9341_touch_calibration_draw(float A[3][4], float x[3]){
+		int i, j, k, n;
+		float c;
+		n = 3;
+		/*A[0][0] = 10;
+		A[0][1] = -7;
+		A[0][2] = 5;
+		A[0][3] = 9;
+		A[1][0] = 3;
+		A[1][1] = 6;
+		A[1][2] = 0;
+		A[1][3] = -9;
+		A[2][0] = 9;
+		A[2][1] = 3;
+		A[2][2] = -2;
+		A[2][3] = -1;*/
+		/* Now finding the elements of diagonal matrix */
+		for (j = 0; j < n; j++) {
+			for (i = 0; i < n; i++) {
+				if (i != j) {
+					c = A[i][j] / A[j][j];
+					for (k = 0; k <= n; k++) {
+						A[i][k] = A[i][k] - c * A[j][k];
+					}
+				}
+			}
+		}
+
+		for (i = 0; i < n; i++) {
+			x[i] = A[i][n] / A[i][i];
+		}
+return;
+}
+void btn_event_cb2(lv_obj_t *btn, lv_event_t event) {
+	if (event == LV_EVENT_CLICKED) {
+		printf("Clicked\n");
+	}
+}
+void ili9341_touch_lvgl_calibration(int screen_x, int screen_y){
+	static lv_obj_t * prev_scr;
+	static lv_obj_t * big_btn;
+	int touch_points[4][2];
+	/*touch_points[0][]={10,10};
+	touch_points[1][]={10, screen_y-10};
+	touch_points[2][]={screen_x-10,10};
+	touch_points[3][]={screen_x-10,screen_y-10};*/
+
+	prev_scr = lv_scr_act();
+    lv_obj_t * scr = lv_obj_create(NULL);
+    lv_obj_set_size(scr, screen_x , screen_y);
+    lv_scr_load(scr);
+    //big_btn = lv_btn_create(lv_scr_act());
+    //lv_obj_add_event_cb(big_btn, btn_event_cb2, NULL);
+
+    static lv_style_t style_circ;
+    lv_style_set_radius(&style_circ, 5);
+    lv_style_set_bg_color(&style_circ, lv_color_black());
+    lv_obj_t * obj3;
+    obj3 = lv_obj_create(lv_scr_act());
+        lv_obj_add_style(obj3, &style_circ, 0);
+        lv_obj_set_size(obj3, 10, 10);
+
+        //lv_obj_align_mid(obj3, LV_ALIGN_TOP_LEFT, 10, 10);
+
+    //lv_scr_load(prev_scr);
+
 }
 void ili9341_touch_lvgl_handler(ili9341_t *lcd){
 	if (ili9341_touch_pressed(lcd)){
