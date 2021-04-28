@@ -99,8 +99,8 @@ bool my_input_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
 	data->state = _lcd->touch_pressed; // or LV_INDEV_STATE_REL;
 	return false; /*No buffering now so no more data read*/
 }
-void btn_event_cb(lv_obj_t *btn, lv_event_t event) {
-	if (event == LV_EVENT_CLICKED) {
+static void btn_event_cb(lv_obj_t *btn, lv_event_t event) {
+	if (event.code == LV_EVENT_CLICKED) {
 		printf("Clicked\n");
 	}
 }
@@ -255,7 +255,7 @@ int main(void) {
 	btn = lv_btn_create(lv_scr_act());
 
 	//lv_obj_align(btn, NULL, 0, -40);
-	lv_obj_add_event_cb(btn, btn_event_cb, NULL);
+	lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);
 	lv_obj_t *label;
 	label = lv_label_create(btn);
 	lv_label_set_text(label, "+");
@@ -269,7 +269,7 @@ int main(void) {
 	/*Create style*/
 	static lv_style_t style_line;
 	lv_style_init(&style_line);
-	lv_style_set_bg_color(&style_line, lv_color_red());
+	lv_style_set_bg_color(&style_line, lv_palette_main(LV_PALETTE_BLUE));
 	lv_style_set_line_width(&style_line, 2);
 	lv_style_set_line_rounded(&style_line, true);
 	lv_style_set_bg_opa(&style_line, LV_OPA_10);
@@ -290,7 +290,7 @@ int main(void) {
 					"and  wrap long text automatically.");
 	lv_obj_set_width(label1, 150);
 
-	ili9341_touch_lvgl_calibration();
+	//ili9341_touch_lvgl_calibration();
 
 	/* USER CODE END 2 */
 

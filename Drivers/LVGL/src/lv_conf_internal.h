@@ -12,7 +12,7 @@
 
 /* Handle special Kconfig options */
 #ifndef LV_KCONFIG_IGNORE
-#   include "../../lvgl/src/lv_conf_kconfig.h"
+#   include "lv_conf_kconfig.h"
 #   ifdef CONFIG_LV_CONF_SKIP
 #       define LV_CONF_SKIP
 #   endif
@@ -38,10 +38,14 @@
 #  elif defined(LV_CONF_INCLUDE_SIMPLE)        /*Or simply include lv_conf.h is enabled*/
 #    include "lv_conf.h"
 #  else
-#    include "../../lvgl/lv_conf.h"                 /*Else assume lv_conf.h is next to the lvgl folder*/
+#    include "../../lv_conf.h"                 /*Else assume lv_conf.h is next to the lvgl folder*/
 #  endif
 #endif
 
+
+/*----------------------------------
+ * Start parsing lv_conf_template.h
+ -----------------------------------*/
 /*clang-format off*/
 
 #include <stdint.h>
@@ -561,8 +565,6 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #    define  LV_USE_USER_DATA      1
 #  endif
 #endif
-#if LV_USE_USER_DATA
-#endif
 
 /*Garbage Collector settings
  *Used if lvgl is binded to higher level language and the memory is managed by that language*/
@@ -702,7 +704,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
  *===================*/
 
 /*Montserrat fonts with ASCII range and some symbols using bpp = 4
- *fonts.google.com/specimen/Montserrat*/
+ *https://fonts.google.com/specimen/Montserrat*/
 #ifndef LV_FONT_MONTSERRAT_8
 #  ifdef CONFIG_LV_FONT_MONTSERRAT_8
 #    define LV_FONT_MONTSERRAT_8 CONFIG_LV_FONT_MONTSERRAT_8
@@ -881,8 +883,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #  endif
 #endif
 
-/*Pixel perfect monospace fonts
- *pelulamu.net/unscii/*/
+/*Pixel perfect monospace fonts*/
 #ifndef LV_FONT_UNSCII_8
 #  ifdef CONFIG_LV_FONT_UNSCII_8
 #    define LV_FONT_UNSCII_8 CONFIG_LV_FONT_UNSCII_8
@@ -1025,7 +1026,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 
 /*Support bidirectional texts. Allows mixing Left-to-Right and Right-to-Left texts.
  *The direction will be processed according to the Unicode Bidirectioanl Algorithm:
- *www.w3.org/International/articles/inline-bidi-markup/uba-basics*/
+ *https://www.w3.org/International/articles/inline-bidi-markup/uba-basics*/
 #ifndef LV_USE_BIDI
 #  ifdef CONFIG_LV_USE_BIDI
 #    define LV_USE_BIDI CONFIG_LV_USE_BIDI
@@ -1061,7 +1062,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
  *  WIDGET USAGE
  *================*/
 
-/*Documentation of the widgets: docs.lvgl.io/latest/en/html/widgets/index.html*/
+/*Documentation of the widgets: https://docs.lvgl.io/latest/en/html/widgets/index.html*/
 
 #ifndef LV_USE_ARC
 #  ifdef CONFIG_LV_USE_ARC
@@ -1397,12 +1398,12 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #endif
 #if LV_USE_THEME_DEFAULT
 
-/*1: Light mode; 0: Dark mode*/
-#ifndef LV_THEME_DEFAULT_PALETTE_LIGHT
-#  ifdef CONFIG_LV_THEME_DEFAULT_PALETTE_LIGHT
-#    define LV_THEME_DEFAULT_PALETTE_LIGHT CONFIG_LV_THEME_DEFAULT_PALETTE_LIGHT
+/*0: Light mode; 1: Dark mode*/
+#ifndef LV_THEME_DEFAULT_DARK
+#  ifdef CONFIG_LV_THEME_DEFAULT_DARK
+#    define LV_THEME_DEFAULT_DARK CONFIG_LV_THEME_DEFAULT_DARK
 #  else
-#    define  LV_THEME_DEFAULT_PALETTE_LIGHT     1
+#    define  LV_THEME_DEFAULT_DARK     0
 #  endif
 #endif
 
@@ -1471,13 +1472,14 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 
 
 
+/*----------------------------------
+ * End of parsing lv_conf_template.h
+ -----------------------------------*/
+
+LV_EXPORT_CONST_INT(LV_DPI_DEF);
+
 /*If running without lv_conf.h add typdesf with default value*/
 #if defined(LV_CONF_SKIP)
-
-
-# if LV_USE_USER_DATA
-  typedef void * lv_obj_user_data_t;
-# endif
 
 # if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)    /*Disable warnings for Visual Studio*/
 #  define _CRT_SECURE_NO_WARNINGS

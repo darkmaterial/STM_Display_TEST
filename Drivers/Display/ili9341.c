@@ -219,7 +219,8 @@ void ili9341_touch_calibration_draw(float A[3][4], float x[3]){
 return;
 }
 void btn_event_cb2(lv_obj_t *btn, lv_event_t event) {
-	if (event == LV_EVENT_CLICKED) {
+	//lv_event_get_code(event);
+	if (event.code == LV_EVENT_CLICKED) {
 		printf("Clicked\n");
 	}
 }
@@ -245,9 +246,10 @@ void ili9341_touch_lvgl_calibration(int screen_x, int screen_y){
     lv_obj_t * obj3;
     obj3 = lv_obj_create(lv_scr_act());
         lv_obj_add_style(obj3, &style_circ, 0);
-        lv_obj_set_size(obj3, 10, 10);
-
-        //lv_obj_align_mid(obj3, LV_ALIGN_TOP_LEFT, 10, 10);
+        lv_obj_set_size(obj3, 20, 20);
+        lv_obj_set_style_translate_x(obj3, lv_pct(50), 0);
+        lv_obj_set_style_translate_y(obj3, lv_pct(-50), 0);
+        lv_obj_align(obj3, LV_ALIGN_TOP_LEFT, 0, 0);
 
     //lv_scr_load(prev_scr);
 

@@ -30,6 +30,22 @@ static inline void lv_style_set_transform_height(lv_style_t * style, lv_coord_t 
     lv_style_set_prop(style, LV_STYLE_TRANSFORM_HEIGHT, v);
 }
 
+static inline void lv_style_set_translate_x(lv_style_t * style, lv_coord_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_TRANSLATE_X, v);
+}
+
+static inline void lv_style_set_translate_y(lv_style_t * style, lv_coord_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_TRANSLATE_Y, v);
+}
+
 static inline void lv_style_set_transform_zoom(lv_style_t * style, lv_coord_t value)
 {
     lv_style_value_t v = {
@@ -78,20 +94,20 @@ static inline void lv_style_set_anim_time(lv_style_t * style, uint32_t value)
     lv_style_set_prop(style, LV_STYLE_ANIM_TIME, v);
 }
 
+static inline void lv_style_set_anim_speed(lv_style_t * style, uint32_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_ANIM_SPEED, v);
+}
+
 static inline void lv_style_set_transition(lv_style_t * style, const lv_style_transition_dsc_t * value)
 {
     lv_style_value_t v = {
         .ptr = value
     };
     lv_style_set_prop(style, LV_STYLE_TRANSITION, v);
-}
-
-static inline void lv_style_set_size(lv_style_t * style, lv_coord_t value)
-{
-    lv_style_value_t v = {
-        .num = (int32_t)value
-    };
-    lv_style_set_prop(style, LV_STYLE_SIZE, v);
 }
 
 static inline void lv_style_set_blend_mode(lv_style_t * style, lv_blend_mode_t value)
@@ -158,12 +174,44 @@ static inline void lv_style_set_width(lv_style_t * style, lv_coord_t value)
     lv_style_set_prop(style, LV_STYLE_WIDTH, v);
 }
 
+static inline void lv_style_set_min_width(lv_style_t * style, lv_coord_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_MIN_WIDTH, v);
+}
+
+static inline void lv_style_set_max_width(lv_style_t * style, lv_coord_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_MAX_WIDTH, v);
+}
+
 static inline void lv_style_set_height(lv_style_t * style, lv_coord_t value)
 {
     lv_style_value_t v = {
         .num = (int32_t)value
     };
     lv_style_set_prop(style, LV_STYLE_HEIGHT, v);
+}
+
+static inline void lv_style_set_min_height(lv_style_t * style, lv_coord_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_MIN_HEIGHT, v);
+}
+
+static inline void lv_style_set_max_height(lv_style_t * style, lv_coord_t value)
+{
+    lv_style_value_t v = {
+        .num = (int32_t)value
+    };
+    lv_style_set_prop(style, LV_STYLE_MAX_HEIGHT, v);
 }
 
 static inline void lv_style_set_x(lv_style_t * style, lv_coord_t value)

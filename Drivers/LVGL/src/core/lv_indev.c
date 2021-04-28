@@ -325,6 +325,10 @@ lv_obj_t * lv_indev_search_obj(lv_obj_t * obj, lv_point_t * point)
 static void indev_pointer_proc(lv_indev_t * i, lv_indev_data_t * data)
 {
     lv_disp_t *disp = i->driver->disp;
+    /*Save the raw points so they can be used again in _lv_indev_read*/
+    i->proc.types.pointer.last_raw_point.x = data->point.x;
+    i->proc.types.pointer.last_raw_point.y = data->point.y;
+
     if(disp->driver->rotated == LV_DISP_ROT_180 || disp->driver->rotated == LV_DISP_ROT_270) {
         data->point.x = disp->driver->hor_res - data->point.x - 1;
         data->point.y = disp->driver->ver_res - data->point.y - 1;
@@ -445,7 +449,7 @@ static void indev_keypad_proc(lv_indev_t * i, lv_indev_data_t * data)
         }
         /*Long press repeated time has elapsed?*/
         else if(i->proc.long_pr_sent != 0 &&
-                lv_tick_elaps(i->proc.longpr_rep_timestamp) > i->driver->long_press_rep_time) {
+                lv_tick_elaps(i->proc.longpr_rep_timestamp) > i->driver->long_press_repeat_time) {
 
             i->proc.longpr_rep_timestamp = lv_tick_get();
 
@@ -598,7 +602,7 @@ static void indev_encoder_proc(lv_indev_t * i, lv_indev_data_t * data)
             i->proc.long_pr_sent = 1;
         }
         /*Long press repeated time has elapsed?*/
-        else if(i->proc.long_pr_sent != 0 && lv_tick_elaps(i->proc.longpr_rep_timestamp) > i->driver->long_press_rep_time) {
+        else if(i->proc.long_pr_sent != 0 && lv_tick_elaps(i->proc.longpr_rep_timestamp) > i->driver->long_press_repeat_time) {
 
             i->proc.longpr_rep_timestamp = lv_tick_get();
 
@@ -875,7 +879,7 @@ static void indev_proc_press(lv_indev_proc_t * proc)
         /*Send long press repeated Call the ancestor's event handler*/
         if(proc->types.pointer.scroll_obj == NULL && proc->long_pr_sent == 1) {
             /*Call the ancestor's event handler about the long press repeat if enough time elapsed*/
-            if(lv_tick_elaps(proc->longpr_rep_timestamp) > indev_act->driver->long_press_rep_time) {
+            if(lv_tick_elaps(proc->longpr_rep_timestamp) > indev_act->driver->long_press_repeat_time) {
                 lv_event_send(indev_obj_act, LV_EVENT_LONG_PRESSED_REPEAT, NULL);
                 if(indev_reset_check(proc)) return;
                 proc->longpr_rep_timestamp = lv_tick_get();
@@ -968,7 +972,7 @@ static void indev_proc_reset_query_handler(lv_indev_t * indev)
 static void indev_click_focus(lv_indev_proc_t * proc)
 {
     /*Handle click focus*/
-    lv_obj_t * obj_to_focus = lv_obj_get_focused_obj(indev_obj_act);
+    lv_obj_t * obj_to_focus = indev_obj_act;
     if(lv_obj_has_flag(obj_to_focus, LV_OBJ_FLAG_CLICK_FOCUSABLE) &&
        proc->types.pointer.last_pressed != obj_to_focus) {
         lv_group_t * g_act = lv_obj_get_group(obj_to_focus);
